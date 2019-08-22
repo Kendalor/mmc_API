@@ -44,4 +44,4 @@ if __name__ == '__main__':
     app.config['MONGO_URI'] = parsed_args.uri
     app.config['MONGO_DBNAME'] = 'twitchCrawl'
     mongo = PyMongo(app)
-    app.run(debug=True)
+    app.run(debug=False)
