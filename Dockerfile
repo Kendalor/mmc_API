@@ -1,5 +1,5 @@
 FROM python
-ENV MONGODB_URI
+ENV MONGODB_URI=uri
 COPY . /app
 WORKDIR /app
 RUN pip install --upgrade pip
