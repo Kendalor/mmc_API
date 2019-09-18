@@ -23,6 +23,8 @@ def configure_app(flask_app):
     flask_app.config['RESTPLUS_VALIDATE'] = settings.RESTPLUS_VALIDATE
     flask_app.config['RESTPLUS_MASK_SWAGGER'] = settings.RESTPLUS_MASK_SWAGGER
     flask_app.config['ERROR_404_HELP'] = settings.RESTPLUS_ERROR_404_HELP
+    flask_app.config['HOST'] = settings.FLASK_HOST
+    flask_app.config['PORT'] = settings.FLASK_PORT
     app.config['MONGO_URI'] = settings.MONGODB_DATABASE_URI
     app.config['MONGO_DBNAME'] = settings.MONGO_DBNAME
 
