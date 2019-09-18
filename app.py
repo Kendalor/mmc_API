@@ -1,47 +1,59 @@
-from flask_pymongo import PyMongo
 from flask import jsonify
-from flask import Flask
-import argparse
-import sys
-from flask_restplus import Resource, Api, fields
+from flask import Flask, Blueprint
+from api.modpackbuilds.endpoints.ModpackBuilds import ns as modpackbuilds_ns
+from api.modpackbuilds.endpoints.ModpackBuildsRelease import ns as modpackbuildsrelease_ns
+import logging.config
+import os
+from flask_restplus import Resource
+import settings
+from database import mongo
+from api.restplus import api
+
+
 app = Flask(__name__)
-api = Api(app)
+logging_conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), 'logging.conf'))
+logging.config.fileConfig(logging_conf_path)
+log = logging.getLogger(__name__)
+
+
+def configure_app(flask_app):
+    flask_app.config['SERVER_NAME'] = settings.FLASK_SERVER_NAME
+    flask_app.config['MONGODB_DATABASE_URI'] = settings.MONGODB_DATABASE_URI
+    flask_app.config['SWAGGER_UI_DOC_EXPANSION'] = settings.RESTPLUS_SWAGGER_UI_DOC_EXPANSION
+    flask_app.config['RESTPLUS_VALIDATE'] = settings.RESTPLUS_VALIDATE
+    flask_app.config['RESTPLUS_MASK_SWAGGER'] = settings.RESTPLUS_MASK_SWAGGER
+    flask_app.config['ERROR_404_HELP'] = settings.RESTPLUS_ERROR_404_HELP
+    app.config['MONGO_URI'] = settings.MONGODB_DATABASE_URI
+    app.config['MONGO_DBNAME'] = settings.MONGO_DBNAME
+
+def initialize_app(flask_app):
+    configure_app(flask_app)
+
+    blueprint = Blueprint('api', __name__, url_prefix='/api')
+    api.init_app(blueprint)
+    api.add_namespace(modpackbuilds_ns)
+    api.add_namespace(modpackbuildsrelease_ns)
+    flask_app.register_blueprint(blueprint)
+
+    mongo.init_app(flask_app)
+    mongo.cx.server_info()
 
 
 
-@api.route('/api/serverfilelink/latest/<string:name>',
-           doc={'name': "Name of the Modpack",
-            "description": "Returns the ServerFileLink of the latest Build for the given Modpack on Curseforge"})
-class ModpackBuilds(Resource):
-    def get(self, name):
-        builds = mongo.db.ModpackBuilds
-        print("Triggered")
-        output = builds.find({'name': name}, {"_id": False, "name": 1, "version": 1, "release": 1,
-                                                  "serverFileLink": 1})
-        return jsonify({"result": sorted(list(output), key=lambda k: int(str(k['version']).replace(".", "")))[-1:]})
+def main():
+    try:
+        initialize_app(app)
+    except:
+        log.info('Error while Initalizing, did you Configure the settings.py ?')
+        exit()
+    log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
+    app.run(debug=settings.FLASK_DEBUG)
 
 
-@api.route('/api/serverfilelink/latest/release/<string:name>',
-           doc={'name': "Name of the Modpack",
-            "description": "Returns the ServerFileLink of the latest Release Build for the given Modpack on Curseforge"})
-class ModpackBuildsRelease(Resource):
-    def get(self, name):
-        builds = mongo.db.ModpackBuilds
-        output = builds.find({'name': name, 'release': "R"}, {"_id": False, "name": 1, "version": 1, "release": 1,
-                                                  "serverFileLink": 1})
-        return jsonify({"result": sorted(list(output), key=lambda k: int(str(k['version']).replace(".", "")))[-1:]})
+
+
+
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='mmc_api')
-    parser.add_argument('-uri',
-                        action="store",
-                        type=str, dest="uri",
-                        required=True,
-                        help="URI of MongoDB")
-
-    parsed_args = parser.parse_args(sys.argv[1:])
-    app.config['MONGO_URI'] = parsed_args.uri
-    app.config['MONGO_DBNAME'] = 'twitchCrawl'
-    mongo = PyMongo(app)
-    app.run(debug=False, port=5000, host="0.0.0.0")
+    main()
