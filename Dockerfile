@@ -1,5 +1,10 @@
 FROM python
-COPY * app/
+COPY api app/
+COPY database app/
+COPY app.py app/
+COPY logging.conf app/
+COPY requirements.txt app/
+COPY settings.py app/
 WORKDIR /app
 RUN ls
 RUN pip install --upgrade pip
