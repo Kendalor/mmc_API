@@ -6,7 +6,7 @@ COPY logging.conf app/
 COPY requirements.txt app/
 COPY settings.py app/
 WORKDIR /app
-RUN tree
+RUN ls
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
