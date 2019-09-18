@@ -1,6 +1,6 @@
 FROM python
-ADD api app
-ADD database app
+ADD ./api app/api
+ADD ./database app/database
 COPY app.py app/
 COPY logging.conf app/
 COPY requirements.txt app/
