@@ -49,7 +49,7 @@ def main():
         log.info('Error while Initalizing, did you Configure the settings.py ?')
         exit()
     log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
-    app.run(debug=settings.FLASK_DEBUG, host=settings.FLASK_HOST)
+    app.run(debug=settings.FLASK_DEBUG, host=settings.FLASK_HOST, port=settings.FLASK_PORT)
 
 
 
