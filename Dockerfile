@@ -5,4 +5,4 @@ WORKDIR /app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-CMD python app.py -uri $MONGODB_URI
+CMD python app.py
